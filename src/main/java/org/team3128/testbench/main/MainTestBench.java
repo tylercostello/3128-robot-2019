@@ -1,4 +1,6 @@
 package org.team3128.testbench.main;
+import org.team3128.testbench.main.AutoTest;
+import org.team3128.testbench.main.LineFollower;
 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
@@ -34,6 +36,7 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
@@ -48,6 +51,7 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class MainTestBench extends NarwhalRobot {
+    public AnalogInput ai;
 
     public TalonSRX boi1, boi2;
     public ListenerManager listenerLeft, listenerRight;
@@ -56,12 +60,14 @@ public class MainTestBench extends NarwhalRobot {
     public int lowGearMaxSpeed;
     public SRXTankDrive drive;
     public NetworkTable table;
-
+    public DigitalInput mydigital;
+    
 	@Override
 	protected void constructHardware()
 	{
 		table = NetworkTableInstance.getDefault().getTable("limelight");
-
+        mydigital= new  DigitalInput(0);
+        ai= new AnalogInput(0);
         boi1 = new TalonSRX(1);
         boi2 = new TalonSRX(2);
 
@@ -123,13 +129,13 @@ public class MainTestBench extends NarwhalRobot {
         listenerRight.addButtonDownListener("DriveMode", () -> {
             table.getEntry("camMode").setNumber(1);
             Log.debug("Limelight Latency", String.valueOf(table.getEntry("tl").getDouble(0.0)));
-  
+
         });
     }
 
     @Override
     protected void constructAutoPrograms() {
-
+        //NarwhalDashboard.addAuto("LineFollower", new LineFollower(0));
     }
 
     @Override
@@ -139,8 +145,18 @@ public class MainTestBench extends NarwhalRobot {
 
     @Override
     protected void teleopPeriodic() {
-
-
+        if (!mydigital.get()){
+            boi1.set(ControlMode.PercentOutput,-50);
+            boi2.set(ControlMode.PercentOutput,-50);
+        }
+        else{
+            boi1.set(ControlMode.PercentOutput,0);
+            boi2.set(ControlMode.PercentOutput,0); 
+        }
+        //Log.debug("Sensor Value",Long.toString(ai.getValue()));
+       // getAccumulatorValue()
+        Log.debug("Sensor Value",Boolean.toString(mydigital.get()));
+        //System.out.println("Sensor Value"+Boolean.toString(mydigital.get()));
     }
 
     @Override
