@@ -261,13 +261,12 @@ public class EnhancedDrive extends NarwhalRobot {
             rightDriveFront.set(ControlMode.PercentOutput,-(.30-(pitch/100)));
         }
         if(pitch<-pitchThreshold){
-            leftDriveFront.set(ControlMode.PercentOutput,-(.30-(yaw/100)));
-            rightDriveFront.set(ControlMode.PercentOutput,-(.30-(yaw/100)));
+            leftDriveFront.set(ControlMode.PercentOutput,-(.30-(pitch/100)));
+            rightDriveFront.set(ControlMode.PercentOutput,-(.30-(pitch/100)));
         }
      /*if (pitch>-pitchThreshold&&pitch<pitchThreshold){  
     rightDriveFront.set(ControlMode.PercentOutput,-(.30+(yaw/100)));
     leftDriveFront.set(ControlMode.PercentOutput,-(.30-(yaw/100)));
-    
     }*/
     Log.debug("Pitch", Float.toString(pitch));
     Log.debug("Yaw", Float.toString(yaw));
