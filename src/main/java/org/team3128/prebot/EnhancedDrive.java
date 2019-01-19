@@ -1,5 +1,10 @@
 package org.team3128.prebot;
 
+
+import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj.SPI;
+
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import org.team3128.common.NarwhalRobot;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -27,7 +32,9 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 
-public class MainPrebot extends NarwhalRobot {
+public class EnhancedDrive extends NarwhalRobot {
+    AHRS ahrs;
+
     public TalonSRX rightDriveFront;
     public TalonSRX rightDriveMiddle;
     public TalonSRX rightDriveBack;
@@ -42,7 +49,6 @@ public class MainPrebot extends NarwhalRobot {
     public ListenerManager lm;
 
     public ADXRS450_Gyro gyro;
-
     public double wheelDiameter;
 
     public double maxLeftSpeed = 0;
@@ -55,9 +61,14 @@ public class MainPrebot extends NarwhalRobot {
     public double valCurrent3 = 0.0;
     public double valCurrent4 = 0.0;
 
+    //public CommandGroup cmdRunner;
+
 	@Override
 	protected void constructHardware()
 	{
+        
+        ahrs = new AHRS(SPI.Port.kMXP); 
+        ahrs.reset();
 		table = NetworkTableInstance.getDefault().getTable("limelight");
 
         rightDriveFront = new TalonSRX(0);
@@ -74,15 +85,23 @@ public class MainPrebot extends NarwhalRobot {
         rightDriveMiddle.set(ControlMode.Follower, rightDriveFront.getDeviceID());
         leftDriveMiddle.set(ControlMode.Follower, leftDriveFront.getDeviceID());
         rightDriveBack.set(ControlMode.Follower, rightDriveFront.getDeviceID());
-        leftDriveBack.set(ControlMode.Follower, rightDriveFront.getDeviceID());
+        leftDriveBack.set(ControlMode.Follower, leftDriveFront.getDeviceID());
 
         wheelDiameter = 3.68 * Length.in;
         SRXTankDrive.initialize(rightDriveFront, leftDriveFront, wheelDiameter * Math.PI, 1, 23.70*Length.in, 28.45*Length.in, 400);
         tankDrive = SRXTankDrive.getInstance();
+        //tankDrive.setRightSpeedScalar(0.1);//0.96038845);
+        
+        //rightDriveFront.setInverted(true);
+        //rightDriveMiddle.setInverted(true);
+        //rightDriveBack.setInverted(true);
 
         leftDriveFront.setInverted(true);
         leftDriveMiddle.setInverted(true);
         leftDriveBack.setInverted(true);
+
+        leftDriveFront.setSensorPhase(true);
+        rightDriveFront.setSensorPhase(true);
         
         joystick = new Joystick(1);
 		lm = new ListenerManager(joystick);
@@ -92,10 +111,12 @@ public class MainPrebot extends NarwhalRobot {
 		gyro.calibrate();
     }
     
-    @Override
-    protected void constructAutoPrograms() {
-
-    }
+    //@Override
+    // protected void constructAutoPrograms() {
+    //     NarwhalDashboard.addAuto("Turn", new Turn(tankDrive));
+    //     NarwhalDashboard.addAuto("Forward", new Forward(tankDrive));
+    //     NarwhalDashboard.addAuto("Test", new Test(tankDrive));
+    // }
 
 	@Override
 	protected void setupListeners() {
@@ -110,6 +131,26 @@ public class MainPrebot extends NarwhalRobot {
 					true);		
         }, "MoveTurn", "MoveForwards", "Throttle");
 
+        lm.nameControl(new Button(12), "FullSpeed");
+        lm.addButtonDownListener("FullSpeed", () ->
+		{
+			tankDrive.tankDrive(1, 1);
+        });
+        lm.addButtonUpListener("FullSpeed", () ->
+		{
+			tankDrive.tankDrive(0, 0);
+		});
+
+        lm.nameControl(new Button(11), "HalfSpeed");
+		lm.addButtonDownListener("HalfSpeed", () ->
+		{
+			tankDrive.tankDrive(.25, .25);
+		});
+        lm.addButtonUpListener("HalfSpeed", () ->
+		{
+			tankDrive.tankDrive(0, 0);
+		});
+
         lm.nameControl(new Button(2), "LightOn");
 		lm.addButtonDownListener("LightOn", () -> {
             table.getEntry("ledMode").setNumber(3);
@@ -123,6 +164,7 @@ public class MainPrebot extends NarwhalRobot {
 		lm.nameControl(ControllerExtreme3D.TRIGGER, "LogLimelight");
 		lm.addButtonDownListener("LogLimelight", () -> { 
         });
+
         
         lm.nameControl(new Button(7), "CamMode");
         lm.addButtonDownListener("CamMode", () -> {
@@ -156,6 +198,24 @@ public class MainPrebot extends NarwhalRobot {
             Log.debug("Limelight Latency", String.valueOf(table.getEntry("tl").getDouble(0.0)));
   
         });
+
+        lm.nameControl(new Button(11), "DriveLL");
+        lm.addButtonDownListener("DriveLL", () -> {
+            for(int i = 0; i<2000; i++){
+                Log.info("trigger", "trigger triggered");
+                valCurrent2 = valCurrent2 + table.getEntry("ty").getDouble(0.0);
+
+            }
+            valCurrent2 = valCurrent2/2000;
+
+            double d = (28.5 - 9.5) / Math.tan(28.0 + valCurrent2);
+
+            //cmdRunner.addSequential(tankDrive.new CmdMoveForward((d * Length.in), 10000, true));
+
+            Log.info("tyav", String.valueOf(valCurrent2));
+            NarwhalDashboard.put("tyav", String.valueOf(valCurrent2));
+            valCurrent2 = 0.0;
+        });
     }
     
     @Override
@@ -180,6 +240,36 @@ public class MainPrebot extends NarwhalRobot {
 		
     }
     public static void main(String... args) {
-        RobotBase.startRobot(MainPrebot::new);
+        RobotBase.startRobot(EnhancedDrive::new);
+    }
+
+
+    @Override
+    protected void teleopInit() {
+
+    }
+
+    @Override
+    protected void teleopPeriodic() {
+    //Float ThetaThreshold = (float)10;     
+    Float yaw=ahrs.getYaw();
+    Float pitchThreshold = (float)10;     
+    Float pitch=ahrs.getPitch();
+    //Float Theta=ahrs.getRoll();
+        if(pitch>pitchThreshold){
+            leftDriveFront.set(ControlMode.PercentOutput,-(.30-(pitch/100)));
+            rightDriveFront.set(ControlMode.PercentOutput,-(.30-(pitch/100)));
+        }
+        if(pitch<-pitchThreshold){
+            leftDriveFront.set(ControlMode.PercentOutput,-(.30-(yaw/100)));
+            rightDriveFront.set(ControlMode.PercentOutput,-(.30-(yaw/100)));
+        }
+     /*if (pitch>-pitchThreshold&&pitch<pitchThreshold){  
+    rightDriveFront.set(ControlMode.PercentOutput,-(.30+(yaw/100)));
+    leftDriveFront.set(ControlMode.PercentOutput,-(.30-(yaw/100)));
+    
+    }*/
+    Log.debug("Pitch", Float.toString(pitch));
+    Log.debug("Yaw", Float.toString(yaw));
     }
 }

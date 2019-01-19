@@ -1,19 +1,16 @@
-package org.team3128.prebot;
+package org.team3128.prebot.main;
 
 import org.team3128.common.NarwhalRobot;
+import org.team3128.prebot.autonomous.TestTurn;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.util.Constants;
-import org.team3128.common.util.units.Angle;
 import org.team3128.common.util.units.Length;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.RobotMath;
 import org.team3128.common.listener.ListenerManager;
-import org.team3128.common.listener.POVValue;
-import org.team3128.common.listener.controltypes.POV;
 import org.team3128.common.narwhaldashboard.NarwhalDashboard;
 import org.team3128.common.listener.controllers.ControllerExtreme3D;
 import org.team3128.common.listener.controltypes.Button;
@@ -23,8 +20,8 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.command.CommandGroup;
 
 
 public class MainPrebot extends NarwhalRobot {
@@ -54,6 +51,8 @@ public class MainPrebot extends NarwhalRobot {
     public double valCurrent2 = 0.0;
     public double valCurrent3 = 0.0;
     public double valCurrent4 = 0.0;
+
+    public CommandGroup cmdRunner;
 
 	@Override
 	protected void constructHardware()
@@ -94,7 +93,7 @@ public class MainPrebot extends NarwhalRobot {
     
     @Override
     protected void constructAutoPrograms() {
-
+        NarwhalDashboard.addAuto("Turn", new TestTurn(tankDrive));
     }
 
 	@Override
@@ -155,6 +154,24 @@ public class MainPrebot extends NarwhalRobot {
             table.getEntry("camMode").setNumber(1);
             Log.debug("Limelight Latency", String.valueOf(table.getEntry("tl").getDouble(0.0)));
   
+        });
+
+        lm.nameControl(new Button(11), "DriveLL");
+        lm.addButtonDownListener("DriveLL", () -> {
+            for(int i = 0; i<2000; i++){
+                Log.info("trigger", "trigger triggered");
+                valCurrent2 = valCurrent2 + table.getEntry("ty").getDouble(0.0);
+
+            }
+            valCurrent2 = valCurrent2/2000;
+
+            double d = (28.5 - 9.5) / Math.tan(28.0 + valCurrent2);
+
+            cmdRunner.addSequential(tankDrive.new CmdMoveForward((d * Length.in), 10000, true));
+
+            Log.info("tyav", String.valueOf(valCurrent2));
+            NarwhalDashboard.put("tyav", String.valueOf(valCurrent2));
+            valCurrent2 = 0.0;
         });
     }
     
