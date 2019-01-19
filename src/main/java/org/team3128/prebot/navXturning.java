@@ -32,7 +32,7 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 
-public class EnhancedDrive extends NarwhalRobot {
+public class navXturning extends NarwhalRobot {
     AHRS ahrs;
 
     public TalonSRX rightDriveFront;
@@ -255,15 +255,20 @@ public class EnhancedDrive extends NarwhalRobot {
     Float yaw=ahrs.getYaw();
     Float pitchThreshold = (float)10;     
     Float pitch=ahrs.getPitch();
+    ahrs.reset();
+    while (yaw<90){
+        leftDriveFront.set(ControlMode.PercentOutput,-(10));
+        rightDriveFront.set(ControlMode.PercentOutput,(10));
+    }
     //Float Theta=ahrs.getRoll();
-        if(pitch>pitchThreshold){
+    /*    if(pitch>pitchThreshold){
             leftDriveFront.set(ControlMode.PercentOutput,-(.0-(pitch/100)));
             rightDriveFront.set(ControlMode.PercentOutput,-(.0-(pitch/100)));
         }
         if(pitch<-pitchThreshold){
             leftDriveFront.set(ControlMode.PercentOutput,-(.0-(pitch/100)));
             rightDriveFront.set(ControlMode.PercentOutput,-(.0-(pitch/100)));
-        }
+        }*/
      /*if (pitch>-pitchThreshold&&pitch<pitchThreshold){  
     rightDriveFront.set(ControlMode.PercentOutput,-(.30+(yaw/100)));
     leftDriveFront.set(ControlMode.PercentOutput,-(.30-(yaw/100)));
