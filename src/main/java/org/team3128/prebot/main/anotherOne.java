@@ -1,4 +1,4 @@
-package org.team3128.prebot;
+package org.team3128.prebot.main;
 
 
 import com.kauailabs.navx.frc.AHRS;
@@ -32,7 +32,7 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 
-public class navXturning extends NarwhalRobot {
+public class anotherOne extends NarwhalRobot {
     AHRS ahrs;
 
     public TalonSRX rightDriveFront;
@@ -110,9 +110,6 @@ public class navXturning extends NarwhalRobot {
         gyro = new ADXRS450_Gyro();
 		gyro.calibrate();
     }
-    @Override
-	protected void setupListeners() {
-    }
     
     //@Override
     // protected void constructAutoPrograms() {
@@ -121,8 +118,9 @@ public class navXturning extends NarwhalRobot {
     //     NarwhalDashboard.addAuto("Test", new Test(tankDrive));
     // }
 
-//	@Override
-	/*protected void setupListeners() {
+	@Override
+	protected void setupListeners() {
+        /*
         lm.nameControl(ControllerExtreme3D.TWIST, "MoveTurn");
 		lm.nameControl(ControllerExtreme3D.JOYY, "MoveForwards");
 		lm.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");		
@@ -163,8 +161,7 @@ public class navXturning extends NarwhalRobot {
         /*listenerRight.nameControl(new Button(2), "LightOff");
 		listenerRight.addButtonUpListener("LightOff", () -> {
 		    table.getEntry("ledMode").setNumber(1);
-        });*/
-        /*
+		});*//*
 		lm.nameControl(ControllerExtreme3D.TRIGGER, "LogLimelight");
 		lm.addButtonDownListener("LogLimelight", () -> { 
         });
@@ -219,10 +216,10 @@ public class navXturning extends NarwhalRobot {
             Log.info("tyav", String.valueOf(valCurrent2));
             NarwhalDashboard.put("tyav", String.valueOf(valCurrent2));
             valCurrent2 = 0.0;
-        });
-    }*/
+        });*/
+    }
     
-    /*@Override
+    @Override
     protected void updateDashboard() {
         //NarwhalDashboard.put("tx", table.getEntry("tx").getNumber(0));
         NarwhalDashboard.put("tx", table.getEntry("tx").getDouble(0.0));
@@ -242,9 +239,9 @@ public class navXturning extends NarwhalRobot {
         SmartDashboard.putNumber("Max Left Speed", maxLeftSpeed);
         SmartDashboard.putNumber("Max Right Speed", maxRightSpeed);
 		
-    }*/
+    }
     public static void main(String... args) {
-        RobotBase.startRobot(EnhancedDrive::new);
+        RobotBase.startRobot(anotherOne::new);
     }
 
 
@@ -255,35 +252,26 @@ public class navXturning extends NarwhalRobot {
 
     @Override
     protected void teleopPeriodic() {
-    //Float ThetaThreshold = (float)10;     
-    Float yaw=ahrs.getYaw();
-    Float pitchThreshold = (float)10;     
-    Float pitch=ahrs.getPitch();
-    //ahrs.reset();
-    //while (yaw<89||yaw>91){
-     //   if (yaw<90){
-        leftDriveFront.set(ControlMode.PercentOutput,-(30));
-        //rightDriveFront.set(ControlMode.PercentOutput,(10));
-     /*   }
-        else{
-            leftDriveFront.set(ControlMode.PercentOutput,(10));
-            rightDriveFront.set(ControlMode.PercentOutput,-(10)); 
+        ahrs.reset();   
+        Float yaw=ahrs.getYaw();
+        Float pitchThreshold = (float)10;     
+        Float pitch=ahrs.getPitch();
+        while (yaw<89||yaw>91){
+        	Log.debug("Pitch", Float.toString(pitch));
+        	Log.debug("Yaw", Float.toString(yaw));	
+		    pitch=ahrs.getPitch();
+		    yaw=ahrs.getYaw();
+            if (yaw<89){
+        	leftDriveFront.set(ControlMode.PercentOutput,(0.5));
+      		rightDriveFront.set(ControlMode.PercentOutput,-(0.5));
+            }
+            else{
+             	leftDriveFront.set(ControlMode.PercentOutput,-(0.5));
+               	rightDriveFront.set(ControlMode.PercentOutput,(0.5)); 
+            }
         }
-    }*/
-    //Float Theta=ahrs.getRoll();
-    /*    if(pitch>pitchThreshold){
-            leftDriveFront.set(ControlMode.PercentOutput,-(.0-(pitch/100)));
-            rightDriveFront.set(ControlMode.PercentOutput,-(.0-(pitch/100)));
-        }
-        if(pitch<-pitchThreshold){
-            leftDriveFront.set(ControlMode.PercentOutput,-(.0-(pitch/100)));
-            rightDriveFront.set(ControlMode.PercentOutput,-(.0-(pitch/100)));
-        }*/
-     /*if (pitch>-pitchThreshold&&pitch<pitchThreshold){  
-    rightDriveFront.set(ControlMode.PercentOutput,-(.30+(yaw/100)));
-    leftDriveFront.set(ControlMode.PercentOutput,-(.30-(yaw/100)));
-    }*/
     Log.debug("Pitch", Float.toString(pitch));
     Log.debug("Yaw", Float.toString(yaw));
     }
+
 }
