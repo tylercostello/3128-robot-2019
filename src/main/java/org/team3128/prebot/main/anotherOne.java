@@ -257,14 +257,14 @@ public class anotherOne extends NarwhalRobot {
         Float yaw=ahrs.getYaw();
         Float pitchThreshold = (float)10;     
         Float pitch=ahrs.getPitch();
-        while (yaw<89.9){
+        while (yaw<119.9){
         	//Log.debug("Pitch", Float.toString(pitch));
         	//Log.debug("Yaw", Float.toString(yaw));	
 		   // pitch=ahrs.getPitch();
             yaw=ahrs.getYaw();
           //  Timer.delay(0.1);
            // Log.debug("Yaw", Float.toString(yaw));
-            if (yaw<89){
+            if (yaw<119.9){
         	leftDriveFront.set(ControlMode.PercentOutput,-(0.1));
       		rightDriveFront.set(ControlMode.PercentOutput,(0.1));
             }
