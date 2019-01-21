@@ -3,8 +3,7 @@ package org.team3128.prebot.main;
 
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.Timer;
-
+import edu.wpi.first.wpilibj.DigitalInput;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import org.team3128.common.NarwhalRobot;
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -33,7 +32,7 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 
-public class anotherOne extends NarwhalRobot {
+public class anotherLineFollower extends NarwhalRobot {
     AHRS ahrs;
 
     public TalonSRX rightDriveFront;
@@ -51,7 +50,7 @@ public class anotherOne extends NarwhalRobot {
 
     public ADXRS450_Gyro gyro;
     public double wheelDiameter;
-    public int counter=0;
+
     public double maxLeftSpeed = 0;
     public double maxRightSpeed = 0;
     public NetworkTable table;
@@ -61,12 +60,13 @@ public class anotherOne extends NarwhalRobot {
     public double valCurrent2 = 0.0;
     public double valCurrent3 = 0.0;
     public double valCurrent4 = 0.0;
-
+    public DigitalInput mydigital= new  DigitalInput(0);
     //public CommandGroup cmdRunner;
 
 	@Override
 	protected void constructHardware()
 	{
+        
         
         ahrs = new AHRS(SPI.Port.kMXP); 
         ahrs.reset();
@@ -253,33 +253,18 @@ public class anotherOne extends NarwhalRobot {
 
     @Override
     protected void teleopPeriodic() {
-      //  ahrs.reset();   
-        Float yaw=ahrs.getYaw();
-        Float pitchThreshold = (float)10;     
-        Float pitch=ahrs.getPitch();
-        while (yaw<89.9){
-        	//Log.debug("Pitch", Float.toString(pitch));
-        	//Log.debug("Yaw", Float.toString(yaw));	
-		   // pitch=ahrs.getPitch();
-            yaw=ahrs.getYaw();
-          //  Timer.delay(0.1);
-           // Log.debug("Yaw", Float.toString(yaw));
-            if (yaw<89){
-        	leftDriveFront.set(ControlMode.PercentOutput,-(0.1));
-      		rightDriveFront.set(ControlMode.PercentOutput,(0.1));
-            }
-            else{
-                Log.debug("Yaw", Float.toString(yaw));
-            }
-           /* else{
-             	leftDriveFront.set(ControlMode.PercentOutput,-(0.1));
-               	rightDriveFront.set(ControlMode.PercentOutput,(0.1)); 
-            }*/
+        Log.debug("Sensor Value",Boolean.toString(mydigital.get()));
+        if (!mydigital.get()){
+            //Log.debug("Driving Status: ","Driving");
+            
+                leftDriveFront.set(ControlMode.PercentOutput,-(0.2));
+                rightDriveFront.set(ControlMode.PercentOutput,-(0.1)); 
+            
         }
-        leftDriveFront.set(ControlMode.PercentOutput,(0));
-      		rightDriveFront.set(ControlMode.PercentOutput,(0));
-   // Log.debug("Pitch", Float.toString(pitch));
-    //Log.debug("Yaw", Float.toString(yaw));
+        else{
+            leftDriveFront.set(ControlMode.PercentOutput,-(0.1));
+            rightDriveFront.set(ControlMode.PercentOutput,-(0.2)); 
+        }
     }
 
 }
