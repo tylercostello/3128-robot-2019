@@ -254,22 +254,22 @@ public class anotherOne extends NarwhalRobot {
     @Override
     protected void teleopPeriodic() {
       //  ahrs.reset();   
-        Float yaw=ahrs.getYaw();
+        Double yaw=ahrs.getAngle();
         Float pitchThreshold = (float)10;     
         Float pitch=ahrs.getPitch();
-        while (yaw<119.9){
+        while (yaw<359.9){
         	//Log.debug("Pitch", Float.toString(pitch));
         	//Log.debug("Yaw", Float.toString(yaw));	
 		   // pitch=ahrs.getPitch();
-            yaw=ahrs.getYaw();
+            yaw=ahrs.getAngle();
           //  Timer.delay(0.1);
            // Log.debug("Yaw", Float.toString(yaw));
-            if (yaw<119.9){
+            if (yaw<359.9){
         	leftDriveFront.set(ControlMode.PercentOutput,-(0.1));
       		rightDriveFront.set(ControlMode.PercentOutput,(0.1));
             }
             else{
-                Log.debug("Yaw", Float.toString(yaw));
+                Log.debug("Yaw", Double.toString(yaw));
             }
            /* else{
              	leftDriveFront.set(ControlMode.PercentOutput,-(0.1));
