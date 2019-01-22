@@ -161,8 +161,8 @@ public class anotherOne extends NarwhalRobot {
             yaw=ahrs.getAngle();
 
             if (yaw<359.9){
-        	leftDriveFront.set(ControlMode.PercentOutput,-(0.1));
-      		rightDriveFront.set(ControlMode.PercentOutput,(0.1));
+        	    leftDriveFront.set(ControlMode.PercentOutput,-(0.1));
+      		    rightDriveFront.set(ControlMode.PercentOutput,(0.1));
             }
             else{
                 Log.debug("Yaw", Double.toString(yaw));
