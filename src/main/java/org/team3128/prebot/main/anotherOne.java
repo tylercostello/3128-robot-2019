@@ -170,7 +170,7 @@ public class anotherOne extends NarwhalRobot {
           
         }
         leftDriveFront.set(ControlMode.PercentOutput,(0));
-      		rightDriveFront.set(ControlMode.PercentOutput,(0));
+      	rightDriveFront.set(ControlMode.PercentOutput,(0));
    
     }
 
