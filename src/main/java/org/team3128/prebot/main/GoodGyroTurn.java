@@ -1,8 +1,9 @@
-package org.team3128.prebot;
+package org.team3128.prebot.main;
 
 
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.Timer;
 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import org.team3128.common.NarwhalRobot;
@@ -32,7 +33,7 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 
-public class EnhancedDrive extends NarwhalRobot {
+public class GoodGyroTurn extends NarwhalRobot {
     AHRS ahrs;
 
     public TalonSRX rightDriveFront;
@@ -50,7 +51,7 @@ public class EnhancedDrive extends NarwhalRobot {
 
     public ADXRS450_Gyro gyro;
     public double wheelDiameter;
-
+    public int counter=0;
     public double maxLeftSpeed = 0;
     public double maxRightSpeed = 0;
     public NetworkTable table;
@@ -88,7 +89,7 @@ public class EnhancedDrive extends NarwhalRobot {
         leftDriveBack.set(ControlMode.Follower, leftDriveFront.getDeviceID());
 
         wheelDiameter = 3.68 * Length.in;
-        SRXTankDrive.initialize(rightDriveFront, leftDriveFront, wheelDiameter * Math.PI, 1, 23.70*Length.in, 28.45*Length.in, 400);
+        SRXTankDrive.initialize(rightDriveFront, leftDriveFront, wheelDiameter * Math.PI, 1, 23.70*Length.in, 400);
         tankDrive = SRXTankDrive.getInstance();
         //tankDrive.setRightSpeedScalar(0.1);//0.96038845);
         
@@ -111,116 +112,17 @@ public class EnhancedDrive extends NarwhalRobot {
 		gyro.calibrate();
     }
     
-    //@Override
-    // protected void constructAutoPrograms() {
-    //     NarwhalDashboard.addAuto("Turn", new Turn(tankDrive));
-    //     NarwhalDashboard.addAuto("Forward", new Forward(tankDrive));
-    //     NarwhalDashboard.addAuto("Test", new Test(tankDrive));
-    // }
+  
 
 	@Override
 	protected void setupListeners() {
-        lm.nameControl(ControllerExtreme3D.TWIST, "MoveTurn");
-		lm.nameControl(ControllerExtreme3D.JOYY, "MoveForwards");
-		lm.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");		
-
-        lm.addMultiListener(() -> {
-			tankDrive.arcadeDrive(-0.5 * lm.getAxis("MoveTurn"),
-					lm.getAxis("MoveForwards"),
-					-1 * lm.getAxis("Throttle"),
-					true);		
-        }, "MoveTurn", "MoveForwards", "Throttle");
-
-        lm.nameControl(new Button(12), "FullSpeed");
-        lm.addButtonDownListener("FullSpeed", () ->
-		{
-			tankDrive.tankDrive(1, 1);
-        });
-        lm.addButtonUpListener("FullSpeed", () ->
-		{
-			tankDrive.tankDrive(0, 0);
-		});
-
-        lm.nameControl(new Button(11), "HalfSpeed");
-		lm.addButtonDownListener("HalfSpeed", () ->
-		{
-			tankDrive.tankDrive(.25, .25);
-		});
-        lm.addButtonUpListener("HalfSpeed", () ->
-		{
-			tankDrive.tankDrive(0, 0);
-		});
-
-        lm.nameControl(new Button(2), "LightOn");
-		lm.addButtonDownListener("LightOn", () -> {
-            table.getEntry("ledMode").setNumber(3);
-            Log.debug("Limelight Latency", String.valueOf(table.getEntry("tl").getDouble(0.0)));
-  
-        });
-        /*listenerRight.nameControl(new Button(2), "LightOff");
-		listenerRight.addButtonUpListener("LightOff", () -> {
-		    table.getEntry("ledMode").setNumber(1);
-		});*/
-		lm.nameControl(ControllerExtreme3D.TRIGGER, "LogLimelight");
-		lm.addButtonDownListener("LogLimelight", () -> { 
-        });
-
-        
-        lm.nameControl(new Button(7), "CamMode");
-        lm.addButtonDownListener("CamMode", () -> {
-            for(int i = 0; i<10000; i++){
-                Log.info("trigger", "trigger triggered");
-                valCurrent1 = valCurrent1 + table.getEntry("tx").getDouble(0.0);
-                valCurrent2 = valCurrent2 + table.getEntry("ty").getDouble(0.0);
-                valCurrent3 = valCurrent3 + table.getEntry("ts").getDouble(0.0);
-                valCurrent4 = valCurrent4 + table.getEntry("ta").getDouble(0.0);
-
-            }
-            valCurrent1 = valCurrent1/10000;
-            valCurrent2 = valCurrent2/10000;
-            valCurrent3 = valCurrent3/10000;
-            valCurrent4 = valCurrent4/10000;
-            Log.info("vals", String.valueOf(valCurrent1));
-            NarwhalDashboard.put("txav", String.valueOf(valCurrent1));
-            NarwhalDashboard.put("tyav", String.valueOf(valCurrent2));
-            NarwhalDashboard.put("tzav", String.valueOf(valCurrent3));
-            NarwhalDashboard.put("taav", String.valueOf(valCurrent4));
-            valCurrent1 = 0.0;
-            valCurrent2 = 0.0;
-            valCurrent3 = 0.0;
-            valCurrent4 = 0.0;
-  
-        });
-
-        lm.nameControl(new Button(8), "DriveMode");
-        lm.addButtonDownListener("DriveMode", () -> {
-            table.getEntry("camMode").setNumber(1);
-            Log.debug("Limelight Latency", String.valueOf(table.getEntry("tl").getDouble(0.0)));
-  
-        });
-
-        lm.nameControl(new Button(11), "DriveLL");
-        lm.addButtonDownListener("DriveLL", () -> {
-            for(int i = 0; i<2000; i++){
-                Log.info("trigger", "trigger triggered");
-                valCurrent2 = valCurrent2 + table.getEntry("ty").getDouble(0.0);
-
-            }
-            valCurrent2 = valCurrent2/2000;
-
-            double d = (28.5 - 9.5) / Math.tan(28.0 + valCurrent2);
-
-            //cmdRunner.addSequential(tankDrive.new CmdMoveForward((d * Length.in), 10000, true));
-
-            Log.info("tyav", String.valueOf(valCurrent2));
-            NarwhalDashboard.put("tyav", String.valueOf(valCurrent2));
-            valCurrent2 = 0.0;
-        });
+      
     }
     
     @Override
     protected void updateDashboard() {
         //NarwhalDashboard.put("tx", table.getEntry("tx").getNumber(0));
+        //hey
         NarwhalDashboard.put("tx", table.getEntry("tx").getDouble(0.0));
         NarwhalDashboard.put("ty", table.getEntry("ty").getDouble(0.0));
         NarwhalDashboard.put("tv", table.getEntry("tv").getDouble(0.0));
@@ -240,35 +142,41 @@ public class EnhancedDrive extends NarwhalRobot {
 		
     }
     public static void main(String... args) {
-        RobotBase.startRobot(EnhancedDrive::new);
+        RobotBase.startRobot(GoodGyroTurn::new);
+        //ahrs.reset();
+        //hey
     }
 
-
+   
     @Override
     protected void teleopInit() {
         ahrs.reset();
+        //gyroTurnClass.gyroTurn(leftDriveFront,rightDriveFront,359.9);
+        
     }
 
     @Override
     protected void teleopPeriodic() {
-    //Float ThetaThreshold = (float)10;     
-    Float yaw=ahrs.getYaw();
-    Float pitchThreshold = (float)10;     
-    Float pitch=ahrs.getPitch();
-    //Float Theta=ahrs.getRoll();
-        if(pitch>pitchThreshold){
-            leftDriveFront.set(ControlMode.PercentOutput,-(.0-(pitch/100)));
-            rightDriveFront.set(ControlMode.PercentOutput,-(.0-(pitch/100)));
+  
+        Double yaw=ahrs.getAngle();
+        Float pitchThreshold = (float)10;     
+        Float pitch=ahrs.getPitch();
+        while (yaw<359.9){
+
+            yaw=ahrs.getAngle();
+
+            if (yaw<359.9){
+        	    leftDriveFront.set(ControlMode.PercentOutput,-(0.1));
+      		    rightDriveFront.set(ControlMode.PercentOutput,(0.1));
+            }
+            else{
+                Log.debug("Yaw", Double.toString(yaw));
+            }
+          
         }
-        if(pitch<-pitchThreshold){
-            leftDriveFront.set(ControlMode.PercentOutput,-(.0-(pitch/100)));
-            rightDriveFront.set(ControlMode.PercentOutput,-(.0-(pitch/100)));
-        }
-     /*if (pitch>-pitchThreshold&&pitch<pitchThreshold){  
-    rightDriveFront.set(ControlMode.PercentOutput,-(.30+(yaw/100)));
-    leftDriveFront.set(ControlMode.PercentOutput,-(.30-(yaw/100)));
-    }*/
-    Log.debug("Pitch", Float.toString(pitch));
-    Log.debug("Yaw", Float.toString(yaw));
+        leftDriveFront.set(ControlMode.PercentOutput,(0));
+      	rightDriveFront.set(ControlMode.PercentOutput,(0));
+   
     }
+
 }

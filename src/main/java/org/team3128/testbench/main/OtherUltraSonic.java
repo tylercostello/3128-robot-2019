@@ -26,7 +26,7 @@ import org.team3128.common.util.Log;
 import org.team3128.common.util.enums.Direction;
 import org.team3128.common.util.units.Angle;
 import org.team3128.common.util.units.Length;
-
+import edu.wpi.first.wpilibj.AnalogInput;
 import java.io.IOException;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -42,6 +42,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.CommandGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
@@ -57,7 +58,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class MainTestBench extends NarwhalRobot {
+public class OtherUltraSonic extends NarwhalRobot {
 
     public TalonSRX boi1, boi2;
     public ListenerManager listenerLeft, listenerRight;
@@ -67,7 +68,7 @@ public class MainTestBench extends NarwhalRobot {
     public SRXTankDrive drive;
     public NetworkTable table;
     double tx, ty, ta, ts, taL, taR, ratio, thoriz, tvert, thorizL, tvertL, thorizR, tvertR;
-
+    AnalogInput ai = new AnalogInput(0);
     public File f;
     public File ftemp;
     BufferedWriter bw;
@@ -383,13 +384,19 @@ public class MainTestBench extends NarwhalRobot {
 
     @Override
     protected void teleopInit() {
-
+        //int x=0;
     }
 
     @Override
     protected void teleopPeriodic() {
-
-
+        int av=0;
+        for(int i=0;i<100000;i++){
+        //Log.debug("UltraSonic Voltage", Double.toString(ai.getVoltage()));
+        av=av+ai.getValue()/10;
+    }
+    av=av/100000;
+         Log.debug("UltraSonic Raw",Integer.toString(av));
+        //Timer.delay(0.1);
     }
 
     @Override
@@ -398,7 +405,7 @@ public class MainTestBench extends NarwhalRobot {
     }
 
     public static void main(String[] args) {
-        RobotBase.startRobot(MainTestBench::new);
+        RobotBase.startRobot(OtherUltraSonic::new);
     }
 
 }
